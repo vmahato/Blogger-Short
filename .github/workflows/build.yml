@@ -1,0 +1,144 @@
+name: Build APK
+on: [push, workflow_dispatch]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - uses: gradle/actions/setup-gradle@v4
+        with: { gradle-version: 8.7 }
+      - name: Create project files
+        run: |
+          mkdir -p $(dirname 'app/build.gradle.kts')
+          cat > 'app/build.gradle.kts' <<'EOF_0'
+          plugins {
+              id("com.android.application")
+              id("org.jetbrains.kotlin.android")
+          }
+          android {
+              namespace = "com.example.bloggershort"
+              compileSdk = 34
+              defaultConfig {
+                  applicationId = "com.example.bloggershort"
+                  minSdk = 26
+                  targetSdk = 34
+                  versionCode = 1
+                  versionName = "1.0"
+              }
+              kotlinOptions { jvmTarget = "17" }
+              compileOptions {
+                  sourceCompatibility = JavaVersion.VERSION_17
+                  targetCompatibility = JavaVersion.VERSION_17
+              }
+          }
+          dependencies { implementation("androidx.browser:browser:1.8.0") }
+          EOF_0
+          mkdir -p $(dirname 'app/src/main/AndroidManifest.xml')
+          cat > 'app/src/main/AndroidManifest.xml' <<'EOF_1'
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <uses-permission android:name="android.permission.INTERNET" />
+              <application
+                  android:icon="@mipmap/ic_launcher"
+                  android:roundIcon="@mipmap/ic_launcher"
+                  android:label="@string/app_name"
+                  android:theme="@style/Theme.BloggerShort">
+                  <activity android:name=".MainActivity" android:exported="true">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          EOF_1
+          mkdir -p $(dirname 'app/src/main/kotlin/com/example/bloggershort/MainActivity.kt')
+          cat > 'app/src/main/kotlin/com/example/bloggershort/MainActivity.kt' <<'EOF_2'
+          package com.example.bloggershort
+
+          import android.app.Activity
+          import android.graphics.Color
+          import android.net.Uri
+          import android.os.Bundle
+          import androidx.browser.customtabs.CustomTabColorSchemeParams
+          import androidx.browser.customtabs.CustomTabsIntent
+
+          class MainActivity : Activity() {
+              override fun onCreate(savedInstanceState: Bundle?) {
+                  super.onCreate(savedInstanceState)
+                  val orange = CustomTabColorSchemeParams.Builder()
+                      .setToolbarColor(Color.parseColor("#FF5722"))
+                      .setNavigationBarColor(Color.parseColor("#FF5722"))
+                      .build()
+                  CustomTabsIntent.Builder()
+                      .setDefaultColorSchemeParams(orange)
+                      .setShowTitle(true)
+                      .build()
+                      .launchUrl(this, Uri.parse("https://blogger.com"))
+                  finish()
+              }
+          }
+          EOF_2
+          mkdir -p $(dirname 'app/src/main/res/drawable/ic_foreground.xml')
+          cat > 'app/src/main/res/drawable/ic_foreground.xml' <<'EOF_3'
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="108dp" android:height="108dp"
+              android:viewportWidth="108" android:viewportHeight="108">
+              <path android:fillColor="#FFFFFF"
+                  android:pathData="M42,28 h24 a14,14 0 0 1 14,14 v24 a14,14 0 0 1 -14,14 h-24 a14,14 0 0 1 -14,-14 v-24 a14,14 0 0 1 14,-14 z"/>
+              <path android:fillColor="#FF5722"
+                  android:pathData="M42,42 h14 a3.5,3.5 0 0 1 0,7 h-14 a3.5,3.5 0 0 1 0,-7 z"/>
+              <path android:fillColor="#FF5722"
+                  android:pathData="M42,59 h24 a3.5,3.5 0 0 1 0,7 h-24 a3.5,3.5 0 0 1 0,-7 z"/>
+          </vector>
+          EOF_3
+          mkdir -p $(dirname 'app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml')
+          cat > 'app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml' <<'EOF_4'
+          <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+              <background android:drawable="@color/blogger_orange"/>
+              <foreground android:drawable="@drawable/ic_foreground"/>
+          </adaptive-icon>
+          EOF_4
+          mkdir -p $(dirname 'app/src/main/res/values/colors.xml')
+          cat > 'app/src/main/res/values/colors.xml' <<'EOF_5'
+          <resources><color name="blogger_orange">#FF5722</color></resources>
+          EOF_5
+          mkdir -p $(dirname 'app/src/main/res/values/strings.xml')
+          cat > 'app/src/main/res/values/strings.xml' <<'EOF_6'
+          <resources><string name="app_name">Blogger Short</string></resources>
+          EOF_6
+          mkdir -p $(dirname 'app/src/main/res/values/themes.xml')
+          cat > 'app/src/main/res/values/themes.xml' <<'EOF_7'
+          <resources>
+              <style name="Theme.BloggerShort" parent="android:Theme.Material.Light.NoActionBar">
+                  <item name="android:windowBackground">@color/blogger_orange</item>
+                  <item name="android:statusBarColor">@color/blogger_orange</item>
+                  <item name="android:navigationBarColor">@color/blogger_orange</item>
+              </style>
+          </resources>
+          EOF_7
+          mkdir -p $(dirname 'build.gradle.kts')
+          cat > 'build.gradle.kts' <<'EOF_8'
+          plugins {
+              id("com.android.application") version "8.5.2" apply false
+              id("org.jetbrains.kotlin.android") version "1.9.24" apply false
+          }
+          EOF_8
+          mkdir -p $(dirname 'gradle.properties')
+          cat > 'gradle.properties' <<'EOF_9'
+          android.useAndroidX=true
+          EOF_9
+          mkdir -p $(dirname 'settings.gradle.kts')
+          cat > 'settings.gradle.kts' <<'EOF_10'
+          pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
+          dependencyResolutionManagement { repositories { google(); mavenCentral() } }
+          rootProject.name = "BloggerShort"
+          include(":app")
+          EOF_10
+      - run: gradle assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BloggerShort-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          
